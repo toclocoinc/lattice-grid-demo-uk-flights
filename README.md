@@ -45,7 +45,7 @@ MapLibre GL JS 4.7.1, deck.gl 9.1.0 and DuckDB-WASM 1.32.0 from jsDelivr.
 
 ## Run it locally
 
-The page loads Lattice Grid 1.77.0 from the jsDelivr CDN. To try a local
+The page loads Lattice Grid 1.78.0 from the jsDelivr CDN. To try a local
 build instead, copy the grid's `dist/` to `vendor/` (not part of this
 repository) and set `LOCAL = true` at the top of `index.html`. Serve the
 folder with any static server, for example:
