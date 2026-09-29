@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>UK Airport Routes — deck.gl Arc Map | Lattice Grid</title>
+        <link rel="icon" href="data:,">
+        <script>
+            const LOCAL = false;
+            const LIB = LOCAL ? 'vendor/' : 'https://cdn.jsdelivr.net/npm/@toclocoinc/lattice-grid@1.77.0/';
+            document.write('<link rel="stylesheet" href="' + LIB + 'lattice-grid.min.css">');
+            for (const file of ['lattice-grid.min.js', 'modules/layout.min.js', 'modules/kpi.min.js',
+                'modules/charts.min.js', 'modules/deckgl.min.js']) {
+                document.write('<script src="' + LIB + file + '?v=2026-09-29a"><' + '/script>');
+            }
+        </script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+        <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js?v=2026-09-29a"></script>
+        <script src="https://cdn.jsdelivr.net/npm/deck.gl@9.1.0/dist.min.js?v=2026-09-29a"></script>
+        <script src="data.js?v=2026-09-29a"></script>
+        <script src="loading.js?v=2026-09-29a"></script>
+        <script src="arcs.js?v=2026-09-29a"></script>
+        <style>
+            body { margin: 0; font: 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+                   background: var(--lattice-background, #fff); color: var(--lattice-foreground, #14171a); }
+            .panel { display: flex; flex-direction: column; height: 100%; box-sizing: border-box; padding: 4px 8px; }
+            .panel__head { font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+                           color: var(--lattice-foreground-muted, #5b6570); padding-bottom: 4px; }
+            .panel__body { flex: 1 1 auto; min-height: 0; position: relative; overflow: auto; }
+            #map-body .panel__body { overflow: hidden; }
+            #basemap, #deck { position: absolute; inset: 0; }
+            .legend { display: flex; flex-wrap: wrap; gap: 3px 10px; font-size: 11px; margin: 4px 0; }
+            .sw { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 3px; vertical-align: -1px; }
+            #presets button { font: inherit; margin: 0 3px 3px 0; padding: 1px 7px; cursor: pointer; }
+            #presets button.on { font-weight: 700; outline: 2px solid var(--lattice-accent, #1f6feb); }
+            #group-by { font: inherit; margin-top: 2px; }
+            #footer-body { font-size: 11px; color: var(--lattice-foreground-muted, #5b6570); }
+            #footer-body a { color: var(--lattice-accent, #1f6feb); }
+            .loading { position: fixed; top: 6px; left: 6px; width: calc(62.5% - 9px); height: calc(65% - 9px); z-index: 4;
+                       display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem;
+                       box-sizing: border-box; background: rgba(255, 255, 255, .9); color: #14171a; font-size: 15px; }
+            [data-theme="dark"] .loading { background: rgba(20, 23, 26, .9); color: #e6e8ea; }
+            .loading[hidden] { display: none; }
+            .loading button, #status button { font: inherit; margin-left: .4rem; padding: .1rem .6rem; }
+        </style>
+    </head>
+    <body>
+        <div id="status" style="position: fixed; top: 4px; right: 10px; z-index: 5; font-size: 11px">Starting DuckDB-Wasm&hellip;</div>
+        <div id="container" style="height: 100vh"></div>
+        <div class="loading" id="loading" role="status" aria-live="polite"><p id="loading-text">Starting DuckDB-WASM&hellip;</p></div>
+        <template id="controls-panel">
+            <div id="presets"></div>
+            <label>Group by <select id="group-by">
+                <option value="">none</option>
+                <option value="airline_name">airline</option>
+                <option value="region">region</option>
+            </select></label>
+            <div class="legend" id="origin-legend"></div>
+        </template>
+        <template id="footer-panel">
+            Historical UK airport-route schedule snapshot, circa 2018. Defunct carriers (Thomas Cook, Monarch) are kept
+            and labelled. "Est./week" assumes every scheduled flight number runs daily (services &times; 7) — an
+            <strong>upper-bound estimate</strong>, not a measured frequency. Data: Tocloco Inc, historical UK schedule
+            snapshot (circa 2018). Basemap: <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a>
+            Positron, <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">&copy; OpenMapTiles</a>,
+            data <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap contributors</a>
+            &middot; drawing: <a href="https://deck.gl" target="_blank" rel="noopener">deck.gl</a> +
+            <a href="https://maplibre.org" target="_blank" rel="noopener">MapLibre GL JS</a> &middot; Lattice Grid 1.77.0
+        </template>
+        <script>
+            LatticeGrid.setLicence('LG1.eyJ2IjoxLCJwIjoibGF0dGljZS1ncmlkIiwidCI6IlRPQ0xPQ08gSW5jIC0gcHVibGljIGRlbW9zIiwiZSI6IjIwMzAtMDEtMDEiLCJkIjpbInRvY2xvY29pbmMuZ2l0aHViLmlvIl19.9De42ua3aCGpiMB6EVRP7Tv-upUlDI-0T07rlSPzvCrsqg8t4YJi7SRnStEpAg48uzmcG7il1fR_TfwkUE7iCA');
+        </script>
+        <script src="app.js?v=2026-09-29a"></script>
+    </body>
+</html>
